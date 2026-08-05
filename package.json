@@ -1,0 +1,14 @@
+{
+  "name": "devtinder-backend",
+  "version": "1.0.0",
+  "description": "This is the backend code for dev tinder",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon src/app.js"
+  },
+  "author": "Firoz",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
