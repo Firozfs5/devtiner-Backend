@@ -3,7 +3,7 @@ const authRouter = express.Router();
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
-const validateSignUpData = require("../utils/validation");
+const { validateSignUpData } = require("../utils/validation");
 
 authRouter.post("/signup", async (req, res) => {
   try {
@@ -30,6 +30,7 @@ authRouter.post("/signup", async (req, res) => {
 
 authRouter.post("/login", async (req, res) => {
   try {
+    console.log(req.body);
     const { emailId, password } = req.body;
     console.log(emailId + " " + password);
     const user = await User.findOne({ emailId: emailId });
@@ -48,6 +49,14 @@ authRouter.post("/login", async (req, res) => {
   } catch (err) {
     res.status(400).send("ERROR :" + err.message);
   }
+});
+
+authRouter.post("/logout", async (req, res) => {
+  // res.clearCookie("token");
+  res.cookie("token", null, {
+    expires: new Date(Date.now()),
+  });
+  res.send("user is logged out");
 });
 
 module.exports = authRouter;

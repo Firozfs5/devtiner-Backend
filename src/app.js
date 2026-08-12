@@ -5,12 +5,16 @@ const ConnectDB = require("./config/database");
 const cookieParser = require("cookie-parser");
 const authRouter = require("./routes/auth");
 const profileRouter = require("./routes/profile");
+const requestRouter = require("./routes/requests");
+const userRouter = require("./routes/user");
 
 app.use(express.json());
 app.use(cookieParser());
 
+app.use("/", requestRouter);
 app.use("/", authRouter);
 app.use("/", profileRouter);
+app.use("/", userRouter);
 
 ConnectDB()
   .then(() => {
@@ -23,126 +27,3 @@ ConnectDB()
     console.log("there was error to connect to the databse");
     console.error(err);
   });
-
-// {
-//   firstName: "Firoz",
-//   lastName: "s",
-//   gender: "male",
-//   password: "12345678",
-//   emailId: "firoz@gmail.com",
-// }
-
-// app.get("/feed", async (req, res) => {
-//   try {
-//     let users = await User.find({});
-//     res.send(users);
-//   } catch (err) {
-//     res.status(401).send("there was some error");
-//   }
-// });
-
-// app.get("/user/:id", async (req, res) => {
-//   try {
-//     let user = await User.findById(req.params.id);
-//     res.send(user);
-//   } catch (err) {
-//     res.status(401).send("there is some errpr");
-//   }
-// });
-
-// app.delete("/user", async (req, res) => {
-//   try {
-//     let user = await User.findByIdAndDelete(req.body.id);
-//     res.send(user);
-//   } catch {
-//     res.status(401).send("error exist");
-//   }
-// });
-
-// app.patch("/user/:userId", async (req, res) => {
-//   try {
-//     const ALLOWED_UPDATES = [
-//       "age",
-//       "about",
-//       "gender",
-//       "photoUrl",
-//       "about",
-//       "skills",
-//     ];
-
-//     const isUpdateAllowed = Object.keys(req.body).every((ele) => {
-//       console.log(ele);
-//       return ALLOWED_UPDATES.includes(ele);
-//     });
-
-//     if (!isUpdateAllowed) {
-//       res.status(401).send("THERE are some data which cant be updated");
-//     }
-//     const user = await User.findByIdAndUpdate(req.params.userId, req.body, {
-//       returnDocument: "after",
-//       runValidators: true,
-//     });
-//     res.send(user);
-//   } catch (err) {
-//     res.status(401).send("theres a error");
-//   }
-// });
-// app.get("/user", async (req, res) => {
-//   console.log(req.body.emailId);
-//   try {
-//     let user = await User.find({});
-//     res.send(user);
-//   } catch (err) {
-//     console.error("there was some error");
-//     res.status(401).send("there was some error");
-//   }
-// });
-
-// app.post("/signup", async (req, res) => {
-//   try {
-//     //validating Data
-//     validateSignUpData(req);
-
-//     const { firstName, lastName, password, emailId } = req.body;
-//     const passwordHash = await bcrypt.hash(password, 10);
-//     const user = new User({
-//       firstName,
-//       lastName,
-//       emailId,
-//       password: passwordHash,
-//     });
-
-//     await user.save();
-//     console.log("data is saved");
-//     res.send("data saved");
-//   } catch (err) {
-//     console.error("there was error ", err);
-//     res.send("data couldnt saved");
-//   }
-// });
-
-// app.post("/login", async (req, res) => {
-//   try {
-//     const { emailId, password } = req.body;
-//     console.log(emailId + " " + password);
-//     const user = await User.findOne({ emailId: emailId });
-//     if (!user) {
-//       throw new Error("Invalid Credentials");
-//     }
-
-//     const isPassowrdValid = await user.validatePassword(password);
-//     if (!isPassowrdValid) {
-//       throw new Error("Invalid Credentials");
-//     } else {
-//       const token = await user.getJWT();
-//       res.cookie("token", token);
-//       res.send("Login successfull");
-//     }
-//   } catch (err) {
-//     res.status(400).send("ERROR :" + err.message);
-//   }
-// });
-
-// app.get("/profile", userAuth, async (req, res) => {
-//   res.send(req.user);
-// });

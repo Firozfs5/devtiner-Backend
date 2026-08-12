@@ -7,7 +7,7 @@ const userAuth = async (req, res, next) => {
     if (!token) throw new Error("Token is invalid");
     const decoded = await jwt.verify(token, "dev@tinder");
     const user = await User.findById(decoded._id);
-    console.log(user);
+    // console.log(user);
     if (!user) {
       throw new Error("User doesnt exists");
     }

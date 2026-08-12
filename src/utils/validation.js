@@ -1,4 +1,5 @@
 let validator = require("validator");
+const bcrypt = require("bcrypt");
 
 const validateSignUpData = (req) => {
   let { firstName, lastName, emailId, password } = req.body;
@@ -11,4 +12,31 @@ const validateSignUpData = (req) => {
   }
 };
 
-module.exports = { validateSignUpData };
+const validateEditProfileData = (req) => {
+  const ALLOWED_UPDATES = [
+    "firstName",
+    "lastName",
+    "gender",
+    "skills",
+    "about",
+    "photoUrl",
+    "age",
+  ];
+
+  return Object.keys(req.body).every((field) =>
+    ALLOWED_UPDATES.includes(field),
+  );
+};
+
+const validateOldPassword = async (oldpasswordEnteredByUser, oldPassword) => {
+  if (!(await bcrypt.compare(oldpasswordEnteredByUser, oldPassword))) {
+    throw new Error("Previous Password is wrong ");
+  }
+  return true;
+};
+
+module.exports = {
+  validateSignUpData,
+  validateEditProfileData,
+  validateOldPassword,
+};
