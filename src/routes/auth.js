@@ -30,9 +30,7 @@ authRouter.post("/signup", async (req, res) => {
 
 authRouter.post("/login", async (req, res) => {
   try {
-    console.log(req.body);
     const { emailId, password } = req.body;
-    console.log(emailId + " " + password);
     const user = await User.findOne({ emailId: emailId });
     if (!user) {
       throw new Error("Invalid Credentials");
@@ -44,7 +42,7 @@ authRouter.post("/login", async (req, res) => {
     } else {
       const token = await user.getJWT();
       res.cookie("token", token);
-      res.send("Login successfull");
+      res.send(user);
     }
   } catch (err) {
     res.status(400).send("ERROR :" + err.message);

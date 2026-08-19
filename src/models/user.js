@@ -47,8 +47,6 @@ const userSchema = new mongoose.Schema(
     },
     photoUrl: {
       type: String,
-      default:
-        "https://www.google.com/imgres?q=photo%20full%20passoprt%20size%20dummy&imgurl=https%3A%2F%2Fongcvidesh.com%2Fwp-content%2Fuploads%2F2019%2F08%2Fdummy-image.jpg&imgrefurl=https%3A%2F%2Fongcvidesh.com%2Fcompany%2Fboard-of-directors%2Fdummy-image%2F&docid=wMqD_3Kr1DPkrM&tbnid=l4re0hUB_4ii0M&vet=12ahUKEwinyZSbhY6WAxVoSmwGHZjvKP0QnPAOegQISxAA..i&w=452&h=449&hcb=2&ved=2ahUKEwinyZSbhY6WAxVoSmwGHZjvKP0QnPAOegQISxAA",
     },
     about: {
       type: String,
