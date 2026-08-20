@@ -8,7 +8,7 @@ userRouter.get("/user/requests/recieved", userAuth, async (req, res) => {
   try {
     const loggedInUser = req.user;
 
-    const connectionRequestsObject = await connectionRequests
+    const connectionRequestsObject = await connectionRequest
       .find({
         toUserId: loggedInUser._id,
         status: "interested",
@@ -24,21 +24,35 @@ userRouter.get("/user/requests/recieved", userAuth, async (req, res) => {
 userRouter.get("/user/connections", userAuth, async (req, res) => {
   const loggedInUser = req.user;
 
-  const connections = await connectionRequests
+  const connections = await connectionRequest
     .find({
       $or: [
         { fromUserId: loggedInUser._id, status: "accepted" },
         { toUserId: loggedInUser._id, status: "accepted" },
       ],
     })
-    .populate("fromUserId", ["firstName", "lastName"])
-    .populate("toUserId", ["firstName", "lastName"]);
+    .populate("fromUserId", [
+      "firstName",
+      "lastName",
+      "photoUrl",
+      "gender",
+      "age",
+      "about",
+    ])
+    .populate("toUserId", [
+      "firstName",
+      "lastName",
+      "photoUrl",
+      "gender",
+      "age",
+      "about",
+    ]);
 
   const data = connections.map((item) => {
     if (item.fromUserId._id.equals(loggedInUser._id)) {
-      return item.fromUserId;
+      return item.toUserId;
     }
-    return item.toUserId;
+    return item.fromUserId;
   });
 
   res.json({ data });
@@ -67,7 +81,7 @@ userRouter.get("/feed", userAuth, async (req, res) => {
     const data = await User.find({
       _id: { $nin: [...hideUsersInFeed] },
     })
-      .select("firstName lastName photoUrl gender age")
+      .select("firstName lastName photoUrl gender age about skills ")
       .skip(skip)
       .limit(limit);
 
