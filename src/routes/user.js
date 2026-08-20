@@ -13,9 +13,16 @@ userRouter.get("/user/requests/recieved", userAuth, async (req, res) => {
         toUserId: loggedInUser._id,
         status: "interested",
       })
-      .populate("fromUserId", ["firstName", "lastName"]);
+      .populate("fromUserId", ["firstName", "lastName"])
+      .select("fromUserId")
+      .lean();
 
-    res.json({ message: "The request u recieved", connectionRequestsObject });
+    const users = connectionRequestsObject.map((request) => ({
+      ...request.fromUserId,
+      requestId: request._id,
+    }));
+
+    res.json({ message: "The request u recieved", users });
   } catch (err) {
     res.status(400).send("ERROR:" + err);
   }

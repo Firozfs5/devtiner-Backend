@@ -20,7 +20,6 @@ requestRouter.post(
 
       //toSenderID exists?
       const senderId = await User.findById(toUserId);
-      console.log(senderId);
       if (!senderId) {
         throw new Error("User not found");
       }
