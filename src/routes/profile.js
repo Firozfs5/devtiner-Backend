@@ -7,10 +7,20 @@ const {
   validateOldPassword,
 } = require("../utils/validation");
 const validator = require("validator");
+ConnectionRequestModel = require("../models/connectionRequest");
 const bcrypt = require("bcrypt");
 
 profileRouter.get("/profile/view", userAuth, async (req, res) => {
-  res.send(req.user);
+  const userConnections = await ConnectionRequestModel.find({
+    status: "accepted",
+    $or: [{ fromUserId: req.user._id }, { toUserId: req.user._id }],
+  });
+
+  const data = {
+    ...req.user.toObject(),
+    userConnections: userConnections.length,
+  };
+  res.send(data);
 });
 
 profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
@@ -37,7 +47,7 @@ profileRouter.patch("/profile/password", userAuth, async (req, res) => {
     if (validator.isStrongPassword(newPasswordByuser)) {
       req.user.password = await bcrypt.hash(newPasswordByuser, 10);
       await req.user.save();
-      res.send("password is updates");
+      res.send("password is updated");
     } else {
       throw new Error("New password is not strong enough");
     }
@@ -45,6 +55,5 @@ profileRouter.patch("/profile/password", userAuth, async (req, res) => {
     res.status(400).send(err.message);
   }
 });
-// $2b$10$Hq1goRXR6lalAOOjNQRBgeK9cM9feLgLrF7fFRFZCp4lrT.5NMRL2
 
 module.exports = profileRouter;

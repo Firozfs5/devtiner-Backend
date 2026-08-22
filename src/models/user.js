@@ -34,6 +34,11 @@ const userSchema = new mongoose.Schema(
       type: Number,
       min: 18,
     },
+    profileVisibility: {
+      type: String,
+      enum: ["public", "private"],
+      default: "public",
+    },
     gender: {
       type: String,
       enum: {

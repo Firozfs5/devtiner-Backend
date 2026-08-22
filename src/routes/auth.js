@@ -40,9 +40,24 @@ authRouter.post("/login", async (req, res) => {
     if (!isPassowrdValid) {
       throw new Error("Invalid Credentials");
     } else {
+      const userConnections = await ConnectionRequestModel.find({
+        status: "accepted",
+        $or: [{ fromUserId: user._id }, { toUserId: user._id }],
+      });
+
+      const data = {
+        ...user.toObject(),
+        userConnections: userConnections.length,
+      };
       const token = await user.getJWT();
-      res.cookie("token", token);
-      res.send(user);
+      // res.cookie("token", token);
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: false,
+        sameSite: "lax",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+      res.send(data);
     }
   } catch (err) {
     res.status(400).send("ERROR :" + err.message);
