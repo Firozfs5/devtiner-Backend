@@ -8,11 +8,10 @@ userRouter.get("/user/requests/recieved", userAuth, async (req, res) => {
   try {
     const loggedInUser = req.user;
 
-    const connectionRequestsObject = await connectionRequest
-      .find({
-        toUserId: loggedInUser._id,
-        status: "interested",
-      })
+    const connectionRequestsObject = await ConnectionRequestModel.find({
+      toUserId: loggedInUser._id,
+      status: "interested",
+    })
       .populate("fromUserId", ["firstName", "lastName", "photoUrl"])
       .select("fromUserId")
       .lean();
@@ -30,13 +29,12 @@ userRouter.get("/user/requests/recieved", userAuth, async (req, res) => {
 userRouter.get("/user/connections", userAuth, async (req, res) => {
   const loggedInUser = req.user;
 
-  const connections = await connectionRequest
-    .find({
-      $or: [
-        { fromUserId: loggedInUser._id, status: "accepted" },
-        { toUserId: loggedInUser._id, status: "accepted" },
-      ],
-    })
+  const connections = await ConnectionRequestModel.find({
+    $or: [
+      { fromUserId: loggedInUser._id, status: "accepted" },
+      { toUserId: loggedInUser._id, status: "accepted" },
+    ],
+  })
     .populate("fromUserId", [
       "firstName",
       "lastName",
@@ -72,11 +70,9 @@ userRouter.get("/feed", userAuth, async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     let skip = (page - 1) * limit;
 
-    const connectionRequests = await connectionRequest
-      .find({
-        $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser._id }],
-      })
-      .select(["fromUserId", "toUserId"]);
+    const connectionRequests = await ConnectionRequestModel.find({
+      $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser._id }],
+    }).select(["fromUserId", "toUserId"]);
     const hideUsersInFeed = new Set();
 
     connectionRequests.forEach((req) => {

@@ -1,6 +1,5 @@
 const express = require("express");
 const profileRouter = express.Router();
-const user = require("../models/user");
 const { userAuth } = require("../middleware/auth");
 const {
   validateEditProfileData,
@@ -9,16 +8,21 @@ const {
 const validator = require("validator");
 ConnectionRequestModel = require("../models/connectionRequest");
 const bcrypt = require("bcrypt");
+const user = require("../models/user");
 
 profileRouter.get("/profile/view", userAuth, async (req, res) => {
   const userConnections = await ConnectionRequestModel.find({
     status: "accepted",
     $or: [{ fromUserId: req.user._id }, { toUserId: req.user._id }],
   });
-
+  const requestCount = await ConnectionRequestModel.countDocuments({
+    status: "interested",
+    toUserId: req.user._id,
+  });
   const data = {
     ...req.user.toObject(),
     userConnections: userConnections.length,
+    requestCount,
   };
   res.send(data);
 });
@@ -53,6 +57,27 @@ profileRouter.patch("/profile/password", userAuth, async (req, res) => {
     }
   } catch (err) {
     res.status(400).send(err.message);
+  }
+});
+
+profileRouter.delete("/profile/delete", userAuth, async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    await ConnectionRequestModel.deleteMany({
+      $or: [{ fromUserId: userId }, { toUserId: userId }],
+    });
+
+    const userData = await user.findByIdAndDelete(userId);
+
+    if (!userData) {
+      return res.status(404).send("User not found");
+    }
+
+    res.send("Account deleted successfully");
+  } catch (err) {
+    console.error("Delete account error:", err);
+    res.status(500).send("Something went wrong");
   }
 });
 

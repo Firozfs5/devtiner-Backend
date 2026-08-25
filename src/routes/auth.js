@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
 const { validateSignUpData } = require("../utils/validation");
+const ConnectionRequestModel = require("../models/connectionRequest");
 
 authRouter.post("/signup", async (req, res) => {
   try {
@@ -45,12 +46,17 @@ authRouter.post("/login", async (req, res) => {
         $or: [{ fromUserId: user._id }, { toUserId: user._id }],
       });
 
+      const requestCount = await ConnectionRequestModel.countDocuments({
+        status: "interested",
+        toUserId: user._id,
+      });
+
       const data = {
         ...user.toObject(),
         userConnections: userConnections.length,
+        requestCount,
       };
       const token = await user.getJWT();
-      // res.cookie("token", token);
       res.cookie("token", token, {
         httpOnly: true,
         secure: false,
