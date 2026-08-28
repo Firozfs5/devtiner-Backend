@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+require("dotenv").config();
 const port = 3000;
 const ConnectDB = require("./config/database");
 const cookieParser = require("cookie-parser");
@@ -8,6 +9,7 @@ const profileRouter = require("./routes/profile");
 const requestRouter = require("./routes/requests");
 const userRouter = require("./routes/user");
 const cors = require("cors");
+const transporter = require("./config/email");
 
 app.use(
   cors({
@@ -34,3 +36,12 @@ ConnectDB()
     console.log("there was error to connect to the databse");
     console.error(err);
   });
+
+transporter.verify((error, success) => {
+  if (error) {
+    console.error("❌ Gmail connection failed:");
+    console.error(error);
+  } else {
+    console.log("✅ Gmail SMTP is ready!");
+  }
+});

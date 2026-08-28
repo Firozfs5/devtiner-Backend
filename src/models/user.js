@@ -69,7 +69,7 @@ userSchema.index({ firstName: 1, lastNames: 1 });
 
 userSchema.methods.getJWT = async function () {
   const user = this;
-  return await jwt.sign({ _id: user._id }, "dev@tinder");
+  return await jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
 };
 
 userSchema.methods.validatePassword = async function (passwordSentByUser) {

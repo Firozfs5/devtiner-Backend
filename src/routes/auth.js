@@ -2,9 +2,9 @@ const express = require("express");
 const authRouter = express.Router();
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
-const jwt = require("jsonwebtoken");
 const { validateSignUpData } = require("../utils/validation");
 const ConnectionRequestModel = require("../models/connectionRequest");
+const sendEmail = require("../utils/sendEmail");
 
 authRouter.post("/signup", async (req, res) => {
   try {
@@ -21,6 +21,7 @@ authRouter.post("/signup", async (req, res) => {
     });
 
     await user.save();
+    await sendEmail(user.emailId, user.firstName);
     console.log("data is saved");
     res.send("data saved");
   } catch (err) {
