@@ -10,6 +10,8 @@ const requestRouter = require("./routes/requests");
 const userRouter = require("./routes/user");
 const cors = require("cors");
 const transporter = require("./config/email");
+const http = require("http");
+const initializeSocket = require("./utils/socket");
 
 app.use(
   cors({
@@ -25,10 +27,17 @@ app.use("/", authRouter);
 app.use("/", profileRouter);
 app.use("/", userRouter);
 
+// socket.io
+
+const server = http.createServer(app);
+initializeSocket(server);
+
+//socket.io
+
 ConnectDB()
   .then(() => {
     console.log("Connected succesfully to database");
-    app.listen(port, () => {
+    server.listen(port, () => {
       console.log("the server is listening at post 3000");
     });
   })
