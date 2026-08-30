@@ -1,4 +1,5 @@
 const socket = require("socket.io");
+const Chat = require("../models/chat");
 
 const initializeSocket = (server) => {
   const io = socket(server, {
@@ -20,12 +21,38 @@ const initializeSocket = (server) => {
       socket.join(roomId);
     });
 
-    socket.on("sendMessage", (messageObj) => {
-      const roomId = [messageObj.userId, messageObj.targetUserId]
-        .sort()
-        .join("-"); //its important to make a room id.
-      console.log(messageObj.sender + ":" + messageObj.text);
-      io.to(roomId).emit("messageRecieved", messageObj);
+    socket.on("sendMessage", async (messageObj) => {
+      const { userId, targetUserId, text } = messageObj;
+      const roomId = [userId, targetUserId].sort().join("-"); //its important to make a room id.
+      // console.log(messageObj.sender + ":" + messageObj.text);
+
+      // Save message in database
+      try {
+        let chat = await Chat.findOne({
+          participants: { $all: [userId, targetUserId] },
+        });
+
+        if (!chat) {
+          chat = new Chat({
+            participants: [targetUserId, userId],
+            messages: [],
+          });
+        }
+
+        chat.messages.push({
+          senderId: userId,
+          text: text,
+        });
+
+        await chat.save();
+
+        const savedMessage = chat.messages[chat.messages.length - 1];
+        console.log(savedMessage);
+        io.to(roomId).emit("messageRecieved", savedMessage);
+      } catch (err) {
+        console.log(err);
+      }
+      //
     });
 
     socket.on("disconnect", () => {});
