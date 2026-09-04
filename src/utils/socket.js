@@ -16,7 +16,7 @@ const initializeSocket = (server) => {
       const roomId = [userId, targetUserId].sort().join("-");
       // console.log(roomId);
 
-      console.log(firstName + " joining " + roomId);
+      // console.log(firstName + " joining " + roomId);
 
       socket.join(roomId);
     });
@@ -54,6 +54,30 @@ const initializeSocket = (server) => {
       }
       //
     });
+
+    //video call events
+
+    socket.on("join:call", ({ targetUserId, userId }) => {
+      const roomId = [targetUserId, userId].sort().join("-");
+      console.log("user " + userId + " joining room " + roomId);
+
+      socket.join(roomId);
+      socket.to(roomId).emit("user:call:joined", { id: socket.id });
+    });
+
+    socket.on("offer", ({ offer, id }) => {
+      socket.to(id).emit("offer", { offer, id: socket.id });
+    });
+
+    socket.on("answer", ({ answer, id }) => {
+      socket.to(id).emit("answer", { answer, id: socket.id });
+    });
+
+    socket.on("ice-candidate", ({ candidate, id }) => {
+      socket.to(id).emit("ice-candidate", { candidate, id: socket.id });
+    });
+
+    //video call events
 
     socket.on("disconnect", () => {});
   });
