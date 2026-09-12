@@ -58,6 +58,9 @@ const userSchema = new mongoose.Schema(
       maxlength: 150,
       // default: "This is about ur profile",
     },
+    cloudinaryPublicId: {
+      type: String,
+    },
     skills: { type: [String] },
   },
   {

@@ -8,25 +8,34 @@ const sendEmail = require("../utils/sendEmail");
 
 authRouter.post("/signup", async (req, res) => {
   try {
-    //validating Data
-    validateSignUpData(req);
+    validateSignUpData(req.body);
 
-    const { firstName, lastName, password, emailId } = req.body;
-    const passwordHash = await bcrypt.hash(password, 10);
-    const user = new User({
+    //recieving data from frontend
+    const { emailId, password, firstName, lastName } = req.body;
+
+    const exisitngUser = await User.findOne({ emailId });
+    if (exisitngUser) throw new Error("Email already exists");
+
+    //hashing password
+    const hashPassword = await bcrypt.hash(password, 10);
+
+    //account creation
+    const newUser = new User({
+      emailId,
+      password: hashPassword,
       firstName,
       lastName,
-      emailId,
-      password: passwordHash,
     });
 
-    await user.save();
-    await sendEmail(user.emailId, user.firstName);
-    console.log("data is saved");
-    res.send("data saved");
+    await newUser.save();
+
+    //sending email
+    sendEmail(newUser.emailId, newUser.firstName).catch((err) =>
+      console.error("Email sending failed:", err),
+    );
+    res.status(201).json({ message: "Account created successfully" });
   } catch (err) {
-    console.error("there was error ", err);
-    res.send("data couldnt saved");
+    res.status(400).json({ error: err.message });
   }
 });
 

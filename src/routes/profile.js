@@ -9,6 +9,8 @@ const validator = require("validator");
 ConnectionRequestModel = require("../models/connectionRequest");
 const bcrypt = require("bcrypt");
 const user = require("../models/user");
+const upload = require("../middleware/upload");
+const uploadToCloudinary = require("../utils/uploadCloudinary");
 
 profileRouter.get("/profile/view", userAuth, async (req, res) => {
   const userConnections = await ConnectionRequestModel.find({
@@ -80,5 +82,46 @@ profileRouter.delete("/profile/delete", userAuth, async (req, res) => {
     res.status(500).send("Something went wrong");
   }
 });
+
+profileRouter.post(
+  "/profile/photo",
+  userAuth,
+  upload.single("profilePhoto"),
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          message: "Please upload an image",
+        });
+      }
+
+      let user = req.user;
+      const oldPublicId = user?.cloudinaryPublicId;
+
+      const result = await uploadToCloudinary(req.file.buffer);
+      console.log(result.secure_url);
+      console.log(result.public_id);
+
+      user.photoUrl = result.secure_url;
+      user.cloudinaryPublicId = result.public_id;
+      await user.save();
+
+      if (oldPublicId) {
+        await cloudinary.uploader.destroy(oldPublicId);
+      }
+
+      res.json({
+        message: "Image uploaded successfully",
+        imageUrl: result.secure_url,
+      });
+    } catch (err) {
+      console.error(err);
+
+      res.status(500).json({
+        message: "Image upload failed",
+      });
+    }
+  },
+);
 
 module.exports = profileRouter;
